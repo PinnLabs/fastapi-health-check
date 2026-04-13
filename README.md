@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="public/logo.png" alt="fastapi-health-check logo" width="520" style="display: block; margin:
+    <img src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo.png" alt="fastapi-health-check logo" width="520" style="display: block; margin:
     0 auto;" />
 </p>
 
@@ -9,7 +9,7 @@ FastAPI health checks with a small public API, a visual status page, and JSON re
 
 ### Example interface
 
-![fastapi-health-check example interface](public/example_use.png)
+![fastapi-health-check example interface](https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/example_use.png)
 
 ## What the library provides
 
