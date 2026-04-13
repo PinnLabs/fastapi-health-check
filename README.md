@@ -11,6 +11,20 @@ FastAPI health checks with a small public API, a visual status page, and JSON re
 
 ![fastapi-health-check example interface](https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/example_use.png)
 
+## Installation
+
+Install with `uv`:
+
+```bash
+uv add fastapi-ht
+```
+
+Install with `pip`:
+
+```bash
+pip install fastapi-ht
+```
+
 ## What the library provides
 
 - A base contract for advanced checks
