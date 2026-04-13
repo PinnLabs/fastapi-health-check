@@ -40,3 +40,10 @@ class HealthCheck(ABC):
     @abstractmethod
     async def check(self) -> str | None:
         """Execute the health check and return an optional success message."""
+
+
+class AppAliveCheck(HealthCheck):
+    default_name = "app_alive"
+
+    async def check(self) -> str | None:
+        return None
