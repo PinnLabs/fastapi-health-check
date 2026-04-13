@@ -1,14 +1,8 @@
-<p align="center">
-  <img src="public/logo.png" alt="fastapi-health-check logo" width="180" />
-</p>
-
 # fastapi-health-check
 
 FastAPI health checks with a small public API, a visual status page, and JSON responses from the same endpoint.
 
 ## Visual overview
-
-### Official logo
 
 ![fastapi-health-check logo](public/logo.png)
 
