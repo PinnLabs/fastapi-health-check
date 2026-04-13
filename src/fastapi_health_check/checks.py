@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
+from inspect import isawaitable
 from abc import ABC, abstractmethod
 from time import perf_counter
 
 from fastapi_health_check.models import HealthCheckResult
+
+CheckHandler = Callable[[], str | None | Awaitable[str | None]]
 
 
 class HealthCheck(ABC):
@@ -47,3 +51,20 @@ class AppAliveCheck(HealthCheck):
 
     async def check(self) -> str | None:
         return None
+
+
+class FunctionHealthCheck(HealthCheck):
+    def __init__(self, name: str, handler: CheckHandler) -> None:
+        super().__init__(name=name)
+        self._handler = handler
+
+    async def check(self) -> str | None:
+        result = self._handler()
+        if isawaitable(result):
+            return await result
+
+        return result
+
+
+def health_check(name: str, handler: CheckHandler) -> FunctionHealthCheck:
+    return FunctionHealthCheck(name=name, handler=handler)

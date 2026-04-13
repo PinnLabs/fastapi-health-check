@@ -5,7 +5,7 @@ import asyncio
 import pytest
 from fastapi import FastAPI
 
-from fastapi_health_check import HealthCheck, HealthRegistry, install_health_check
+from fastapi_health_check import HealthCheck, HealthRegistry, health_check, install_health_check
 
 
 class PassingCheck(HealthCheck):
@@ -77,3 +77,8 @@ def failing_check() -> FailingCheck:
 @pytest.fixture
 def slow_passing_check() -> SlowPassingCheck:
     return SlowPassingCheck("slow")
+
+
+@pytest.fixture
+def callable_check():
+    return health_check("redis", lambda: "cache reachable")
