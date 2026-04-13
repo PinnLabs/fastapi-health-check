@@ -1,0 +1,67 @@
+site_name: fastapi-ht
+site_description: Health checks for FastAPI with a visual status page and JSON responses.
+site_url: https://pinnlabs.github.io/fastapi-health-check/
+repo_url: https://github.com/PinnLabs/fastapi-health-check
+repo_name: PinnLabs/fastapi-health-check
+
+theme:
+  name: material
+  language: en
+  favicon: https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo.png
+  icon:
+    logo: material/heart-pulse
+    repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+    - search.highlight
+    - search.share
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: installation.md
+      - Quickstart: quickstart.md
+      - Local Preview: local-preview.md
+  - Guides:
+      - Custom Checks: custom-checks.md
+      - Endpoint Behavior: endpoint-behavior.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/PinnLabs/fastapi-health-check
+
+edit_uri: edit/main/docs/

@@ -21,6 +21,8 @@ Issues = "https://github.com/PinnLabs/fastapi-health-check/issues"
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.15",
     "mypy>=1.20.0",
     "pytest>=9.0.3",
     "ruff>=0.15.9",
