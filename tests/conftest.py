@@ -42,11 +42,18 @@ def app_factory():
     def factory(
         registry: HealthRegistry,
         *,
-        path: str = "/health",
+        path: str = "/ht",
+        ui_title: str = "System Health",
         include_in_schema: bool = False,
     ) -> FastAPI:
         app = FastAPI()
-        install_health_check(app, registry, path=path, include_in_schema=include_in_schema)
+        install_health_check(
+            app,
+            registry,
+            path=path,
+            ui_title=ui_title,
+            include_in_schema=include_in_schema,
+        )
         return app
 
     return factory
