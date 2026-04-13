@@ -2,21 +2,11 @@ from __future__ import annotations
 
 import asyncio
 
-from fastapi_health_check import AppAliveCheck, HealthCheck
+from fastapi_health_check import AppAliveCheck
 
 
-class MessageCheck(HealthCheck):
-    async def check(self) -> str | None:
-        return "dependency available"
-
-
-class FailingCheck(HealthCheck):
-    async def check(self) -> str | None:
-        raise RuntimeError("dependency unavailable")
-
-
-def test_health_check_run_returns_success_result() -> None:
-    result = asyncio.run(MessageCheck("message").run())
+def test_health_check_run_returns_success_result(message_check) -> None:
+    result = asyncio.run(message_check.run())
 
     assert result.name == "message"
     assert result.status == "ok"
@@ -24,8 +14,8 @@ def test_health_check_run_returns_success_result() -> None:
     assert result.duration_ms >= 0
 
 
-def test_health_check_run_returns_failure_result_on_exception() -> None:
-    result = asyncio.run(FailingCheck("failing").run())
+def test_health_check_run_returns_failure_result_on_exception(failing_check) -> None:
+    result = asyncio.run(failing_check.run())
 
     assert result.name == "failing"
     assert result.status == "fail"
