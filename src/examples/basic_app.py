@@ -1,20 +1,19 @@
 from fastapi import FastAPI
 from fastapi_health_check import (
     AppAliveCheck,
-    HealthCheck,
     HealthRegistry,
+    health_check,
     install_health_check,
 )
 
 
-class DatabaseCheck(HealthCheck):
-    default_name = "database"
-
-    async def check(self) -> str | None:
-        return "connection ok"
-
-
 app = FastAPI()
-registry = HealthRegistry([AppAliveCheck(), DatabaseCheck()])
+registry = HealthRegistry(
+    [
+        AppAliveCheck(),
+        health_check("database", lambda: "connection ok"),
+        health_check("redis", lambda: "cache reachable"),
+    ]
+)
 
 install_health_check(app, registry)
