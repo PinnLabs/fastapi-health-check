@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }}</title>
+    <style>
+{{ styles }}
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <p class="eyebrow">FastAPI Health Check</p>
+        <h1>{{ title }}</h1>
+        <p class="subtitle">A compact operational view of backend dependencies, designed for quick status inspection.</p>
+      </section>
+      <section class="summary">
+        <article class="summary-card">
+          <p class="summary-label">Overall status</p>
+          <div class="badge {{ summary_class }}">{{ summary_label }}</div>
+        </article>
+        <article class="summary-card">
+          <p class="summary-label">Checks</p>
+          <p class="summary-value">{{ checks_count }}</p>
+        </article>
+      </section>
+      <section class="checks">
+{{ checks_markup }}
+      </section>
+    </main>
+  </body>
+</html>
