@@ -22,3 +22,23 @@ If you find a bug, please open an issue and include:
 
 ### Suggesting Enhancements
 We welcome ideas for new features or improvements. Please open an issue to discuss your proposal before starting implementation.
+
+## Local Development Setup
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management.
+
+1.  **Fork and Clone** the repository:
+    ```bash
+    git clone https://github.com/YOUR_USERNAME/fastapi-health-check.git
+    cd fastapi-health-check
+    ```
+
+2.  **Install dependencies**:
+    ```bash
+    uv sync
+    ```
+
+3.  **Activate the environment**:
+    ```bash
+    source .venv/bin/activate
+    ```
