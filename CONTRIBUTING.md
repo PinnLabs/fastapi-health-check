@@ -66,3 +66,33 @@ We use `ruff` for linting and formatting, and `mypy` for static type checking.
     ```
 
 Ensure all these checks pass before submitting your PR.
+
+## Testing
+
+We use `pytest` for testing. Every new feature or bug fix should include tests.
+
+1.  **Run all tests**:
+    ```bash
+    uv run pytest
+    ```
+
+2.  **Run specific test file**:
+    ```bash
+    uv run pytest tests/test_registry.py
+    ```
+
+## Documentation
+
+If your changes affect the API or add new features, please update the documentation in the `docs/` folder.
+
+1.  **Run documentation server locally**:
+    ```bash
+    uv run mkdocs serve
+    ```
+
+## Pull Request Process
+
+1.  Update the `CONTRIBUTING.md` if your change requires updates to the contribution process.
+2.  Ensure tests pass and documentation is updated.
+3.  Submit the PR and describe your changes clearly.
+4.  Wait for feedback and address any requested changes.
