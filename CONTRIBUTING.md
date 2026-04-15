@@ -42,3 +42,27 @@ This project uses [uv](https://docs.astral.sh/uv/) for dependency management.
     ```bash
     source .venv/bin/activate
     ```
+
+## Development Workflow
+
+### Branching
+Create a descriptive branch name:
+- `feature/new-health-check`
+- `fix/database-timeout-issue`
+- `docs/update-installation-guide`
+
+### Coding Standards
+We use `ruff` for linting and formatting, and `mypy` for static type checking.
+
+1.  **Check linting and formatting**:
+    ```bash
+    uv run ruff check .
+    uv run ruff format .
+    ```
+
+2.  **Check types**:
+    ```bash
+    uv run mypy src/
+    ```
+
+Ensure all these checks pass before submitting your PR.
