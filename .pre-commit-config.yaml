@@ -14,3 +14,18 @@ repos:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.15.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [fastapi, pydantic]
+
+  - repo: local
+    hooks:
+      - id: uv-lock-check
+        name: check uv lockfile
+        entry: uv lock --check
+        language: system
+        files: ^pyproject\.toml$|^uv\.lock$
+        pass_filenames: false
