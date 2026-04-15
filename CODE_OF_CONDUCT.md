@@ -40,7 +40,7 @@ Project maintainers who do not follow or enforce the Code of Conduct in good fai
 
 ## Contact Information
 
-To report an incident, please contact: [castroofelipee@gmail.com](mailto:castroofelipee@gmail.com)
+To report an incident, please contact: [help@pinnlabs.online](mailto:help@pinnlabs.online)
 
 ## Attribution
 
