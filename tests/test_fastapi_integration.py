@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from fastapi_health_check import health_check
+
 
 def test_health_endpoint_returns_html_by_default(app_factory, registry_factory, passing_check) -> None:
     app = app_factory(registry_factory(passing_check))
@@ -121,3 +123,41 @@ def test_health_endpoint_accepts_custom_title(app_factory, registry_factory, pas
     response = client.get("/ht")
 
     assert "API Operations" in response.text
+
+
+def test_health_endpoint_returns_503_instead_of_500_for_invalid_check_result(
+    app_factory,
+    registry_factory,
+) -> None:
+    app = app_factory(registry_factory(health_check("invalid", lambda: {"ok": True})))
+    client = TestClient(app, raise_server_exceptions=False)
+
+    response = client.get("/ht", headers={"accept": "application/json"})
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "status": "fail",
+        "checks": [
+            {
+                "name": "invalid",
+                "status": "fail",
+                "message": "health checks must return a string or None",
+                "duration_ms": response.json()["checks"][0]["duration_ms"],
+            }
+        ],
+    }
+    assert response.json()["checks"][0]["duration_ms"] >= 0
+
+
+def test_health_endpoint_renders_html_for_invalid_check_result(
+    app_factory,
+    registry_factory,
+) -> None:
+    app = app_factory(registry_factory(health_check("invalid", lambda: {"ok": True})))
+    client = TestClient(app, raise_server_exceptions=False)
+
+    response = client.get("/ht")
+
+    assert response.status_code == 503
+    assert "Issues detected" in response.text
+    assert "health checks must return a string or None" in response.text

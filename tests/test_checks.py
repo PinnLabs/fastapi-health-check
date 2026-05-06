@@ -48,3 +48,12 @@ def test_health_check_factory_supports_async_handlers() -> None:
     assert result.name == "queue"
     assert result.status == "ok"
     assert result.message == "queue connected"
+
+
+def test_health_check_run_returns_failure_result_on_invalid_message_type() -> None:
+    result = asyncio.run(health_check("invalid", lambda: {"ok": True}).run())
+
+    assert result.name == "invalid"
+    assert result.status == "fail"
+    assert result.message == "health checks must return a string or None"
+    assert result.duration_ms >= 0
