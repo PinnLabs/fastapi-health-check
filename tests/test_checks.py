@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any
 
 from fastapi_health_check import AppAliveCheck, FunctionHealthCheck, health_check
 
@@ -51,7 +52,8 @@ def test_health_check_factory_supports_async_handlers() -> None:
 
 
 def test_health_check_run_returns_failure_result_on_invalid_message_type() -> None:
-    result = asyncio.run(health_check("invalid", lambda: {"ok": True}).run())
+    bad_handler: Any = lambda: {"ok": True}
+    result = asyncio.run(health_check("invalid", bad_handler).run())
 
     assert result.name == "invalid"
     assert result.status == "fail"

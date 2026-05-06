@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi.testclient import TestClient
 
 from fastapi_health_check import health_check
@@ -129,7 +131,8 @@ def test_health_endpoint_returns_503_instead_of_500_for_invalid_check_result(
     app_factory,
     registry_factory,
 ) -> None:
-    app = app_factory(registry_factory(health_check("invalid", lambda: {"ok": True})))
+    bad_handler: Any = lambda: {"ok": True}
+    app = app_factory(registry_factory(health_check("invalid", bad_handler)))
     client = TestClient(app, raise_server_exceptions=False)
 
     response = client.get("/ht", headers={"accept": "application/json"})
@@ -153,7 +156,8 @@ def test_health_endpoint_renders_html_for_invalid_check_result(
     app_factory,
     registry_factory,
 ) -> None:
-    app = app_factory(registry_factory(health_check("invalid", lambda: {"ok": True})))
+    bad_handler: Any = lambda: {"ok": True}
+    app = app_factory(registry_factory(health_check("invalid", bad_handler)))
     client = TestClient(app, raise_server_exceptions=False)
 
     response = client.get("/ht")
