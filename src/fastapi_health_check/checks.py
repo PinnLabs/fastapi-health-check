@@ -4,6 +4,7 @@ from collections.abc import Awaitable, Callable
 from inspect import isawaitable
 from abc import ABC, abstractmethod
 from time import perf_counter
+from typing import Literal
 
 from fastapi_health_check.models import HealthCheckResult
 
@@ -25,21 +26,31 @@ class HealthCheck(ABC):
         started_at = perf_counter()
 
         try:
-            message = await self.check()
+            message = self._validate_message(await self.check())
         except Exception as exc:
-            return HealthCheckResult(
-                name=self.name,
-                status="fail",
-                message=str(exc),
-                duration_ms=round((perf_counter() - started_at) * 1000, 3),
-            )
+            return self._build_result("fail", str(exc), started_at)
 
+        return self._build_result("ok", message, started_at)
+
+    def _build_result(
+        self,
+        status: Literal["ok", "fail"],
+        message: str | None,
+        started_at: float,
+    ) -> HealthCheckResult:
         return HealthCheckResult(
             name=self.name,
-            status="ok",
+            status=status,
             message=message,
             duration_ms=round((perf_counter() - started_at) * 1000, 3),
         )
+
+    def _validate_message(self, message: object) -> str | None:
+        if message is None or isinstance(message, str):
+            return message
+
+        msg = "health checks must return a string or None"
+        raise TypeError(msg)
 
     @abstractmethod
     async def check(self) -> str | None:
