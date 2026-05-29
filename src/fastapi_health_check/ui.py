@@ -24,6 +24,7 @@ def render_health_report_page(report: HealthReport, *, title: str = "FastAPI Hea
         "{{ summary_label }}": escape(summary_label),
         "{{ checks_count }}": str(len(report.checks)),
         "{{ checks_markup }}": checks_markup,
+        "{{ pinnlabs_logo_b64 }}": _PINNLABS_LOGO_B64,
     }
 
     html = _HTML_TEMPLATE
