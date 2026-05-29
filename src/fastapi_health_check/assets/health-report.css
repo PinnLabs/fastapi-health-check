@@ -175,6 +175,12 @@ h1 {
   font-size: 0.85rem;
 }
 
+.powered-by-logo {
+  height: 20px;
+  width: auto;
+  opacity: 0.7;
+}
+
 @media (max-width: 640px) {
   .page {
     width: min(100% - 24px, 960px);
