@@ -165,6 +165,16 @@ h1 {
   border-radius: 20px;
 }
 
+.powered-by {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 0 32px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 @media (max-width: 640px) {
   .page {
     width: min(100% - 24px, 960px);
