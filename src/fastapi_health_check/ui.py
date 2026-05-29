@@ -9,6 +9,7 @@ from fastapi_health_check.models import HealthCheckResult, HealthReport
 _ASSETS = files("fastapi_health_check.assets")
 _HTML_TEMPLATE = (_ASSETS / "health-report.html").read_text(encoding="utf-8")
 _CSS_STYLES = (_ASSETS / "health-report.css").read_text(encoding="utf-8")
+_PINNLABS_LOGO_B64 = base64.b64encode((_ASSETS / "pinnlabs-logo.png").read_bytes()).decode("ascii")
 
 
 def render_health_report_page(report: HealthReport, *, title: str = "FastAPI Health Check") -> str:
