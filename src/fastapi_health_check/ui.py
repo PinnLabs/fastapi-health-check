@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from html import escape
 from importlib.resources import files
 
