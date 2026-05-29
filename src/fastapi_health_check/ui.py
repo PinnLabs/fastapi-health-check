@@ -1,15 +1,31 @@
 from __future__ import annotations
 
 import base64
+from functools import lru_cache
 from html import escape
 from importlib.resources import files
 
 from fastapi_health_check.models import HealthCheckResult, HealthReport
 
 _ASSETS = files("fastapi_health_check.assets")
-_HTML_TEMPLATE = (_ASSETS / "health-report.html").read_text(encoding="utf-8")
-_CSS_STYLES = (_ASSETS / "health-report.css").read_text(encoding="utf-8")
-_PINNLABS_LOGO_B64 = base64.b64encode((_ASSETS / "pinnlabs-logo.png").read_bytes()).decode("ascii")
+
+
+@lru_cache(maxsize=1)
+def _html_template() -> str:
+    return (_ASSETS / "health-report.html").read_text(encoding="utf-8")
+
+
+@lru_cache(maxsize=1)
+def _css_styles() -> str:
+    return (_ASSETS / "health-report.css").read_text(encoding="utf-8")
+
+
+@lru_cache(maxsize=1)
+def _logo_b64() -> str:
+    try:
+        return base64.b64encode((_ASSETS / "pinnlabs-logo.png").read_bytes()).decode("ascii")
+    except OSError:
+        return ""
 
 
 def render_health_report_page(report: HealthReport, *, title: str = "FastAPI Health Check") -> str:
@@ -19,19 +35,28 @@ def render_health_report_page(report: HealthReport, *, title: str = "FastAPI Hea
 
     replacements = {
         "{{ title }}": escape(title),
-        "{{ styles }}": _CSS_STYLES,
+        "{{ styles }}": _css_styles(),
         "{{ summary_class }}": summary_class,
         "{{ summary_label }}": escape(summary_label),
         "{{ checks_count }}": str(len(report.checks)),
         "{{ checks_markup }}": checks_markup,
-        "{{ pinnlabs_logo_b64 }}": _PINNLABS_LOGO_B64,
+        "{{ powered_by_markup }}": _render_powered_by(),
     }
 
-    html = _HTML_TEMPLATE
+    html = _html_template()
     for marker, value in replacements.items():
         html = html.replace(marker, value)
 
     return html
+
+
+def _render_powered_by() -> str:
+    b64 = _logo_b64()
+    img = f'<img src="data:image/png;base64,{b64}" alt="PinnLabs" class="powered-by-logo" />' if b64 else ""
+    return f"""    <footer class="powered-by">
+      <span>Powered by</span>
+      {img}
+    </footer>"""
 
 
 def _render_check_card(check: HealthCheckResult) -> str:
