@@ -6,7 +6,7 @@ from threading import Event
 from time import perf_counter
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from fastapi_health_check import SQLAlchemyCheck
 
@@ -51,5 +51,20 @@ def test_sqlalchemy_check_runs_sync_engine_without_blocking_event_loop() -> None
     engine.dispose()
 
     assert elapsed < 0.5
+    assert result.status == "ok"
+    assert result.message == "SQLAlchemy available"
+
+
+def test_sqlalchemy_check_supports_async_session_factory() -> None:
+    async def run_check():
+        engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+        try:
+            sessions = async_sessionmaker(engine)
+            return await SQLAlchemyCheck(sessions).run()
+        finally:
+            await engine.dispose()
+
+    result = asyncio.run(run_check())
+
     assert result.status == "ok"
     assert result.message == "SQLAlchemy available"
