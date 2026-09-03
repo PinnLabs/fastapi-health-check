@@ -66,3 +66,37 @@ def test_registry_accepts_function_based_checks(registry_factory, callable_check
     assert report.status == "ok"
     assert report.checks[0].name == "redis"
     assert report.checks[0].message == "cache reachable"
+
+
+def test_registered_checks_belong_to_readiness_by_default(passing_check) -> None:
+    registry = HealthRegistry([passing_check])
+
+    readiness_report = asyncio.run(registry.run_readiness_checks())
+    liveness_report = asyncio.run(registry.run_liveness_checks())
+
+    assert [check.name for check in readiness_report.checks] == ["passing"]
+    assert liveness_report.checks == []
+
+
+def test_register_can_assign_a_check_to_liveness_only(failing_check) -> None:
+    registry = HealthRegistry()
+    registry.register(failing_check, readiness=False, liveness=True)
+
+    readiness_report = asyncio.run(registry.run_readiness_checks())
+    liveness_report = asyncio.run(registry.run_liveness_checks())
+
+    assert readiness_report.status == "ok"
+    assert readiness_report.checks == []
+    assert liveness_report.status == "fail"
+    assert [check.name for check in liveness_report.checks] == ["failing"]
+
+
+def test_register_can_assign_a_check_to_both_probes(passing_check) -> None:
+    registry = HealthRegistry()
+    registry.register(passing_check, readiness=True, liveness=True)
+
+    readiness_report = asyncio.run(registry.run_readiness_checks())
+    liveness_report = asyncio.run(registry.run_liveness_checks())
+
+    assert [check.name for check in readiness_report.checks] == ["passing"]
+    assert [check.name for check in liveness_report.checks] == ["passing"]
