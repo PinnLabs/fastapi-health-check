@@ -4,7 +4,7 @@ from typing import Any
 
 from fastapi.testclient import TestClient
 
-from fastapi_health_check import health_check
+from fastapi_health_check import HealthRegistry, health_check
 
 
 def test_health_endpoint_returns_html_by_default(app_factory, registry_factory, passing_check) -> None:
@@ -165,3 +165,69 @@ def test_health_endpoint_renders_html_for_invalid_check_result(
     assert response.status_code == 503
     assert "Issues detected" in response.text
     assert "health checks must return a string or None" in response.text
+
+
+def test_readiness_endpoint_returns_a_healthy_json_report(app_factory, registry_factory, passing_check) -> None:
+    app = app_factory(registry_factory(passing_check))
+    client = TestClient(app)
+
+    response = client.get("/health/ready")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/json")
+    assert response.json() == {
+        "status": "ok",
+        "checks": [
+            {
+                "name": "passing",
+                "status": "ok",
+                "message": None,
+                "duration_ms": response.json()["checks"][0]["duration_ms"],
+            }
+        ],
+    }
+
+
+def test_readiness_failure_does_not_fail_liveness_by_default(
+    app_factory,
+    registry_factory,
+    failing_check,
+) -> None:
+    app = app_factory(registry_factory(failing_check))
+    client = TestClient(app)
+
+    readiness_response = client.get("/health/ready")
+    liveness_response = client.get("/health/live")
+
+    assert readiness_response.status_code == 503
+    assert readiness_response.json()["status"] == "fail"
+    assert readiness_response.json()["checks"][0]["name"] == "failing"
+    assert liveness_response.status_code == 200
+    assert liveness_response.json() == {"status": "ok", "checks": []}
+
+
+def test_liveness_endpoint_returns_an_unhealthy_json_report(app_factory, failing_check) -> None:
+    registry = HealthRegistry()
+    registry.register(failing_check, readiness=False, liveness=True)
+    app = app_factory(registry)
+    client = TestClient(app)
+
+    response = client.get("/health/live")
+
+    assert response.status_code == 503
+    assert response.json()["status"] == "fail"
+    assert response.json()["checks"][0]["name"] == "failing"
+
+
+def test_probe_endpoints_accept_independent_custom_paths(app_factory, registry_factory, passing_check) -> None:
+    app = app_factory(
+        registry_factory(passing_check),
+        liveness_path="/livez",
+        readiness_path="/readyz",
+    )
+    client = TestClient(app)
+
+    assert client.get("/livez").status_code == 200
+    assert client.get("/readyz").status_code == 200
+    assert client.get("/health/live").status_code == 404
+    assert client.get("/health/ready").status_code == 404

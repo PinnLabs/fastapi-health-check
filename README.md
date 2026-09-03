@@ -5,7 +5,7 @@
 
 # fastapi-health-check
 
-FastAPI health checks with a small public API, a visual status page, and JSON responses from the same endpoint.
+FastAPI health checks with separate liveness and readiness probes, a visual status page, and JSON responses.
 
 ### Example interface
 
@@ -29,7 +29,8 @@ pip install fastapi-ht
 
 - A base contract for advanced checks
 - A lightweight registry for collecting and running checks
-- A single `/ht` endpoint with HTML by default
+- Separate `/health/live` and `/health/ready` JSON endpoints
+- A combined `/ht` endpoint with HTML by default
 - JSON responses when the client sends `Accept: application/json`
 - A simple way to monitor any custom area of your system
 
@@ -58,6 +59,29 @@ registry.register(RedisCheck(session_redis, name="session_cache"))
 Redis failures are critical like every health check currently registered in `HealthRegistry`. Connection errors use a sanitized message and never expose credentials from the underlying client exception.
 
 Databases, queues, external APIs, or any other monitored area are meant to be registered by the user.
+The package includes `AppAliveCheck` for application availability and `PostgreSQLCheck` for PostgreSQL connectivity.
+
+`PostgreSQLCheck` reuses an async pool supplied by the application and executes `SELECT 1`. The core package does not install a PostgreSQL driver. Install and configure an async driver such as `asyncpg` in the application when this check is needed.
+
+```python
+import asyncpg
+
+from fastapi_health_check import HealthRegistry, PostgreSQLCheck
+
+
+pool = await asyncpg.create_pool(database_url)
+registry = HealthRegistry([PostgreSQLCheck(pool)])
+```
+
+The default check name is `postgresql`. A custom name can distinguish multiple databases:
+
+```python
+registry.register(PostgreSQLCheck(reporting_pool, name="reporting_database"))
+```
+
+PostgreSQL failures are critical like every health check currently registered in `HealthRegistry`. Connection errors use a sanitized message and never expose credentials from the underlying driver exception.
+
+Redis, queues, external APIs, or any other monitored area are meant to be registered by the user.
 
 ## Quick start
 
@@ -68,21 +92,52 @@ from fastapi_health_check import AppAliveCheck, HealthRegistry, health_check, in
 
 
 app = FastAPI()
-registry = HealthRegistry(
-    [
-        AppAliveCheck(),
-        health_check("database", lambda: "connection ok"),
-        health_check("redis", lambda: "cache reachable"),
-    ]
-)
+registry = HealthRegistry()
+registry.register(AppAliveCheck(), readiness=True, liveness=True)
+registry.register(health_check("database", lambda: "connection ok"))
+registry.register(health_check("redis", lambda: "cache reachable"))
 
 install_health_check(app, registry)
 ```
 
-This exposes `GET /ht`.
+This exposes three routes:
 
-- In a browser, the route renders an HTML health page
-- For automated integrations, the same route returns JSON when the client sends `Accept: application/json`
+- `GET /health/live` returns the liveness report as JSON
+- `GET /health/ready` returns the readiness report as JSON
+- `GET /ht` keeps the combined status page and content-negotiated JSON response
+
+## Liveness and readiness
+
+Liveness answers whether the application process should be restarted. Keep this probe lightweight and independent of databases, caches, external APIs, and other dependencies. A failing liveness check returns `503`.
+
+Readiness answers whether the application can serve traffic. Dependency checks belong here so an unavailable dependency returns `503` and the orchestrator can remove the instance from service without restarting it.
+
+Checks belong to readiness by default:
+
+```python
+registry.register(health_check("database", check_database))
+```
+
+Assign a check to liveness or both probes with registration options:
+
+```python
+registry.register(process_check, readiness=False, liveness=True)
+registry.register(AppAliveCheck(), readiness=True, liveness=True)
+```
+
+Probe paths can be configured independently while retaining `/ht`:
+
+```python
+install_health_check(
+    app,
+    registry,
+    path="/status",
+    liveness_path="/livez",
+    readiness_path="/readyz",
+)
+```
+
+For Kubernetes, configure `livenessProbe` to request `/health/live` and `readinessProbe` to request `/health/ready`. Dependency failures then stop traffic to an unready pod without creating unnecessary restart loops. Kubernetes manifest settings are deployment-specific and outside this library's configuration.
 
 ## Monitoring custom areas
 
@@ -152,3 +207,5 @@ Then open:
 
 - `http://127.0.0.1:8000/ht` for the HTML page
 - `curl -H "Accept: application/json" http://127.0.0.1:8000/ht` for JSON
+- `curl http://127.0.0.1:8000/health/live` for liveness
+- `curl http://127.0.0.1:8000/health/ready` for readiness
