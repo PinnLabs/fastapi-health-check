@@ -1,5 +1,30 @@
 # Custom Checks
 
+## Built-in Redis check
+
+`RedisCheck` verifies connectivity with `PING` through an existing async client. Reusing the application client and its connection pool avoids creating a new connection for every health request.
+
+The Redis client is optional and is not installed with the core package. Install a compatible async client such as `redis` in the application.
+
+```python
+from redis.asyncio import Redis
+
+from fastapi_health_check import HealthRegistry, RedisCheck
+
+
+redis_client = Redis.from_url(redis_url)
+registry = HealthRegistry([RedisCheck(redis_client)])
+```
+
+The client must provide an async `ping()` method. A custom name is supported:
+
+```python
+registry.register(RedisCheck(session_redis, name="session_cache"))
+```
+
+A successful check reports `Redis available`. A connection failure reports `Redis unavailable` without including the original client message, preventing credentials from leaking through health responses.
+
+As with every current health check, a Redis failure is critical and makes its health report fail.
 ## Built-in PostgreSQL check
 
 `PostgreSQLCheck` verifies connectivity with `SELECT 1` through an existing async pool. Reusing the application pool avoids opening a new database connection for every health request.

@@ -36,6 +36,29 @@ pip install fastapi-ht
 
 ## Built-in checks
 
+The package includes `AppAliveCheck` for application availability and `RedisCheck` for Redis connectivity.
+
+`RedisCheck` reuses an async client supplied by the application and executes `PING`. The core package does not install a Redis client. Install and configure an async client such as `redis` in the application when this check is needed.
+
+```python
+from redis.asyncio import Redis
+
+from fastapi_health_check import HealthRegistry, RedisCheck
+
+
+redis_client = Redis.from_url(redis_url)
+registry = HealthRegistry([RedisCheck(redis_client)])
+```
+
+The default check name is `redis`. A custom name can distinguish multiple Redis deployments:
+
+```python
+registry.register(RedisCheck(session_redis, name="session_cache"))
+```
+
+Redis failures are critical like every health check currently registered in `HealthRegistry`. Connection errors use a sanitized message and never expose credentials from the underlying client exception.
+
+Databases, queues, external APIs, or any other monitored area are meant to be registered by the user.
 The package includes `AppAliveCheck` for application availability and `PostgreSQLCheck` for PostgreSQL connectivity.
 
 `PostgreSQLCheck` reuses an async pool supplied by the application and executes `SELECT 1`. The core package does not install a PostgreSQL driver. Install and configure an async driver such as `asyncpg` in the application when this check is needed.
