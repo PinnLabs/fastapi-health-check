@@ -15,12 +15,15 @@ class SQLAlchemyCheck(HealthCheck):
 
     async def check(self) -> str:
         from sqlalchemy import text
-        from sqlalchemy.ext.asyncio import AsyncEngine
+        from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
         statement = text("SELECT 1")
         if isinstance(self._bind, AsyncEngine):
             async with self._bind.connect() as connection:
                 await connection.execute(statement)
+        elif isinstance(self._bind, async_sessionmaker):
+            async with self._bind() as session:
+                await session.execute(statement)
         else:
             await asyncio.to_thread(self._check_sync_engine, statement)
 
