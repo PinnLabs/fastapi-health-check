@@ -34,11 +34,31 @@ pip install fastapi-ht
 - JSON responses when the client sends `Accept: application/json`
 - A simple way to monitor any custom area of your system
 
-## Important note
+## Built-in checks
 
-The library does not ship with a database check by default.
+The package includes `AppAliveCheck` for application availability and `PostgreSQLCheck` for PostgreSQL connectivity.
 
-The only built-in check today is `AppAliveCheck`, which reports that the application is up. Database, Redis, queues, external APIs, or any other monitored area are meant to be registered by the user.
+`PostgreSQLCheck` reuses an async pool supplied by the application and executes `SELECT 1`. The core package does not install a PostgreSQL driver. Install and configure an async driver such as `asyncpg` in the application when this check is needed.
+
+```python
+import asyncpg
+
+from fastapi_health_check import HealthRegistry, PostgreSQLCheck
+
+
+pool = await asyncpg.create_pool(database_url)
+registry = HealthRegistry([PostgreSQLCheck(pool)])
+```
+
+The default check name is `postgresql`. A custom name can distinguish multiple databases:
+
+```python
+registry.register(PostgreSQLCheck(reporting_pool, name="reporting_database"))
+```
+
+PostgreSQL failures are critical like every health check currently registered in `HealthRegistry`. Connection errors use a sanitized message and never expose credentials from the underlying driver exception.
+
+Redis, queues, external APIs, or any other monitored area are meant to be registered by the user.
 
 ## Quick start
 

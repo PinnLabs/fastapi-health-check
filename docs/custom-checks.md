@@ -1,5 +1,31 @@
 # Custom Checks
 
+## Built-in PostgreSQL check
+
+`PostgreSQLCheck` verifies connectivity with `SELECT 1` through an existing async pool. Reusing the application pool avoids opening a new database connection for every health request.
+
+The PostgreSQL driver is optional and is not installed with the core package. Install a compatible async driver such as `asyncpg` in the application.
+
+```python
+import asyncpg
+
+from fastapi_health_check import HealthRegistry, PostgreSQLCheck
+
+
+pool = await asyncpg.create_pool(database_url)
+registry = HealthRegistry([PostgreSQLCheck(pool)])
+```
+
+The pool must provide an async `acquire()` context manager whose connection supports `execute()`. A custom name is supported:
+
+```python
+registry.register(PostgreSQLCheck(reporting_pool, name="reporting_database"))
+```
+
+A successful check reports `PostgreSQL available`. A connection or query failure reports `PostgreSQL unavailable` without including the original driver message, preventing credentials from leaking through health responses.
+
+As with every current health check, a PostgreSQL failure is critical and makes its health report fail.
+
 ## Function-based checks
 
 The easiest way to monitor custom areas is `health_check()`.
