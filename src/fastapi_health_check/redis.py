@@ -17,5 +17,9 @@ class RedisCheck(HealthCheck):
         self._client = client
 
     async def check(self) -> str:
-        await self._client.ping()
+        try:
+            await self._client.ping()
+        except Exception:
+            raise RuntimeError("Redis unavailable") from None
+
         return "Redis available"
