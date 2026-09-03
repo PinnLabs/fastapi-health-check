@@ -33,6 +33,11 @@ class ExistingPool:
         return self.lease
 
 
+class UnavailablePool:
+    def acquire(self) -> ConnectionLease:
+        raise ConnectionError("could not connect to postgresql://admin:secret@database.internal/app")
+
+
 def test_postgresql_check_reuses_pool_and_executes_lightweight_query() -> None:
     connection = AvailableConnection()
     lease = ConnectionLease(connection)
@@ -45,3 +50,13 @@ def test_postgresql_check_reuses_pool_and_executes_lightweight_query() -> None:
     assert result.message == "PostgreSQL available"
     assert connection.executed_query == "SELECT 1"
     assert lease.released is True
+
+
+def test_postgresql_check_sanitizes_connection_failures() -> None:
+    result = asyncio.run(PostgreSQLCheck(UnavailablePool()).run())
+
+    assert result.status == "fail"
+    assert result.message == "PostgreSQL unavailable"
+    assert "admin" not in result.model_dump_json()
+    assert "secret" not in result.model_dump_json()
+    assert "database.internal" not in result.model_dump_json()
