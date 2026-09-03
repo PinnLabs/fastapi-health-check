@@ -17,6 +17,20 @@ pip install fastapi-ht
 - Python 3.12+
 - FastAPI application
 
+## Optional SQLAlchemy support
+
+Install the SQLAlchemy integration only when the application needs it:
+
+```bash
+uv add "fastapi-ht[sqlalchemy]"
+```
+
+```bash
+pip install "fastapi-ht[sqlalchemy]"
+```
+
+The extra installs SQLAlchemy `>=2.0,<3.0` with async support. The core `fastapi-ht` installation does not depend on SQLAlchemy.
+
 ## What gets installed
 
 The package includes:

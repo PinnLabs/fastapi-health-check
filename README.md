@@ -83,6 +83,28 @@ PostgreSQL failures are critical like every health check currently registered in
 
 Redis, queues, external APIs, or any other monitored area are meant to be registered by the user.
 
+### SQLAlchemy
+
+Install the optional SQLAlchemy support:
+
+```bash
+uv add "fastapi-ht[sqlalchemy]"
+```
+
+`SQLAlchemyCheck` supports SQLAlchemy `>=2.0,<3.0` and accepts an existing `Engine`, `AsyncEngine`, `sessionmaker`, or `async_sessionmaker`.
+
+```python
+from sqlalchemy.ext.asyncio import create_async_engine
+
+from fastapi_health_check import HealthRegistry, SQLAlchemyCheck
+
+
+engine = create_async_engine(database_url)
+registry = HealthRegistry([SQLAlchemyCheck(engine)])
+```
+
+The check executes `SELECT 1` through the supplied engine or session factory. Synchronous SQLAlchemy operations run in a worker thread so health checks do not block the application event loop.
+
 ## Quick start
 
 ```python
