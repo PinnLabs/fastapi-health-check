@@ -22,7 +22,10 @@ class PostgreSQLCheck(HealthCheck):
         self._pool = pool
 
     async def check(self) -> str:
-        async with self._pool.acquire() as connection:
-            await connection.execute("SELECT 1")
+        try:
+            async with self._pool.acquire() as connection:
+                await connection.execute("SELECT 1")
+        except Exception:
+            raise RuntimeError("PostgreSQL unavailable") from None
 
         return "PostgreSQL available"
