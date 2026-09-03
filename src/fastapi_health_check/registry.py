@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Iterable
 
 from fastapi_health_check.checks import HealthCheck
@@ -27,5 +28,5 @@ class HealthRegistry:
         return check
 
     async def run_checks(self) -> HealthReport:
-        results = [await check.run() for check in self._checks]
+        results = await asyncio.gather(*(check.run() for check in self._checks))
         return HealthReport.from_checks(results)
