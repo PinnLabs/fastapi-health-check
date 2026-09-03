@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import asyncio
+from functools import partial
+from time import perf_counter
 
 import pytest
 
-from fastapi_health_check import HealthRegistry
+from fastapi_health_check import HealthRegistry, health_check
 
 
 def test_register_returns_registered_check(passing_check) -> None:
@@ -66,3 +68,29 @@ def test_registry_accepts_function_based_checks(registry_factory, callable_check
     assert report.status == "ok"
     assert report.checks[0].name == "redis"
     assert report.checks[0].message == "cache reachable"
+
+
+def test_run_checks_executes_async_checks_concurrently_in_registration_order() -> None:
+    async def delayed_result(message: str, delay: float) -> str:
+        await asyncio.sleep(delay)
+        return message
+
+    registry = HealthRegistry(
+        [
+            health_check("slow", partial(delayed_result, "slow result", 0.3)),
+            health_check("fast", partial(delayed_result, "fast result", 0.05)),
+            health_check("medium", partial(delayed_result, "medium result", 0.15)),
+        ]
+    )
+
+    started_at = perf_counter()
+    report = asyncio.run(registry.run_checks())
+    elapsed = perf_counter() - started_at
+
+    assert elapsed < 0.4
+    assert [check.name for check in report.checks] == ["slow", "fast", "medium"]
+    assert [check.message for check in report.checks] == [
+        "slow result",
+        "fast result",
+        "medium result",
+    ]
