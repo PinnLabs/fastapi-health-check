@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from functools import partial
+from threading import Event
 from time import perf_counter
 
 import pytest
@@ -94,3 +95,28 @@ def test_run_checks_executes_async_checks_concurrently_in_registration_order() -
         "fast result",
         "medium result",
     ]
+
+
+def test_run_checks_does_not_block_the_event_loop_for_sync_handlers() -> None:
+    release_handler = Event()
+
+    def blocking_handler() -> str:
+        release_handler.wait(timeout=1)
+        return "sync result"
+
+    async def release_from_event_loop() -> None:
+        await asyncio.sleep(0.05)
+        release_handler.set()
+
+    async def run_scenario():
+        return await asyncio.gather(
+            HealthRegistry([health_check("sync", blocking_handler)]).run_checks(),
+            release_from_event_loop(),
+        )
+
+    started_at = perf_counter()
+    report, _ = asyncio.run(run_scenario())
+    elapsed = perf_counter() - started_at
+
+    assert elapsed < 0.5
+    assert report.checks[0].message == "sync result"
