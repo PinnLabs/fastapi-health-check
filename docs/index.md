@@ -1,6 +1,6 @@
 # fastapi-ht
 
-FastAPI health checks with a visual status page, a JSON response mode, and a small API for custom monitoring.
+FastAPI health checks with separate liveness and readiness probes, a visual status page, and a small API for custom monitoring.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo.png" alt="fastapi-ht logo" width="220" />
@@ -12,7 +12,8 @@ FastAPI health checks with a visual status page, a JSON response mode, and a sma
 
 ## Why fastapi-ht
 
-- One endpoint, `/ht`, for both browser-friendly HTML and JSON clients
+- Separate `/health/live` and `/health/ready` JSON probes
+- A combined `/ht` endpoint for browser-friendly HTML and JSON clients
 - A lightweight registry for grouping health checks
 - A simple `health_check()` API for custom checks
 - Class-based checks for advanced use cases

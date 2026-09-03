@@ -15,6 +15,8 @@ uv run uvicorn src.examples.basic_app:app --reload
 ## Open the endpoint
 
 - HTML: `http://127.0.0.1:8000/ht`
+- Liveness: `http://127.0.0.1:8000/health/live`
+- Readiness: `http://127.0.0.1:8000/health/ready`
 - JSON:
 
 ```bash
