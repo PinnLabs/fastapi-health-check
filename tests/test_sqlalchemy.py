@@ -7,6 +7,7 @@ from time import perf_counter
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 from fastapi_health_check import SQLAlchemyCheck
 
@@ -65,6 +66,17 @@ def test_sqlalchemy_check_supports_async_session_factory() -> None:
             await engine.dispose()
 
     result = asyncio.run(run_check())
+
+    assert result.status == "ok"
+    assert result.message == "SQLAlchemy available"
+
+
+def test_sqlalchemy_check_supports_sync_session_factory() -> None:
+    engine = create_engine("sqlite:///:memory:")
+    sessions = sessionmaker(engine)
+
+    result = asyncio.run(SQLAlchemyCheck(sessions).run())
+    engine.dispose()
 
     assert result.status == "ok"
     assert result.message == "SQLAlchemy available"
