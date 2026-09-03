@@ -33,11 +33,31 @@ pip install fastapi-ht
 - JSON responses when the client sends `Accept: application/json`
 - A simple way to monitor any custom area of your system
 
-## Important note
+## Built-in checks
 
-The library does not ship with a database check by default.
+The package includes `AppAliveCheck` for application availability and `RedisCheck` for Redis connectivity.
 
-The only built-in check today is `AppAliveCheck`, which reports that the application is up. Database, Redis, queues, external APIs, or any other monitored area are meant to be registered by the user.
+`RedisCheck` reuses an async client supplied by the application and executes `PING`. The core package does not install a Redis client. Install and configure an async client such as `redis` in the application when this check is needed.
+
+```python
+from redis.asyncio import Redis
+
+from fastapi_health_check import HealthRegistry, RedisCheck
+
+
+redis_client = Redis.from_url(redis_url)
+registry = HealthRegistry([RedisCheck(redis_client)])
+```
+
+The default check name is `redis`. A custom name can distinguish multiple Redis deployments:
+
+```python
+registry.register(RedisCheck(session_redis, name="session_cache"))
+```
+
+Redis failures are critical like every health check currently registered in `HealthRegistry`. Connection errors use a sanitized message and never expose credentials from the underlying client exception.
+
+Databases, queues, external APIs, or any other monitored area are meant to be registered by the user.
 
 ## Quick start
 
