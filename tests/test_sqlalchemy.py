@@ -80,3 +80,18 @@ def test_sqlalchemy_check_supports_sync_session_factory() -> None:
 
     assert result.status == "ok"
     assert result.message == "SQLAlchemy available"
+
+
+def test_sqlalchemy_check_returns_sanitized_failure_for_unavailable_engine() -> None:
+    def fail_connection() -> sqlite3.Connection:
+        raise ConnectionError("could not connect with password secret to database.internal")
+
+    engine = create_engine("sqlite://", creator=fail_connection)
+
+    result = asyncio.run(SQLAlchemyCheck(engine).run())
+    engine.dispose()
+
+    assert result.status == "fail"
+    assert result.message == "SQLAlchemy unavailable"
+    assert "secret" not in result.model_dump_json()
+    assert "database.internal" not in result.model_dump_json()
