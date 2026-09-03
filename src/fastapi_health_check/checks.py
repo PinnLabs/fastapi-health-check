@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable, Callable
 from inspect import isawaitable
 from abc import ABC, abstractmethod
@@ -70,7 +71,7 @@ class FunctionHealthCheck(HealthCheck):
         self._handler = handler
 
     async def check(self) -> str | None:
-        result = self._handler()
+        result = await asyncio.to_thread(self._handler)
         if isawaitable(result):
             return await result
 
