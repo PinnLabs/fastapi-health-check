@@ -13,7 +13,6 @@
   --accent-soft: rgba(11, 127, 171, 0.14);
   --shadow: 0 22px 50px rgba(15, 23, 42, 0.08);
 }
-
 * {
   box-sizing: border-box;
 }
@@ -187,8 +186,35 @@ h1 {
     padding-top: 32px;
   }
 
+
   .summary-card,
   .check-card {
     border-radius: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #111827;
+    --panel: #1f2937;
+    --panel-border: #374151;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --ok: #34d399;
+    --ok-soft: #052e24;
+    --fail: #f87171;
+    --fail-soft: #450a0a;
+    --accent: #38bdf8;
+    --accent-soft: rgba(56, 189, 248, 0.14);
+    --shadow: 0 22px 50px rgba(0, 0, 0, 0.28);
+  }
+
+  body {
+    background: var(--bg);
+  }
+
+  .empty {
+    background: rgba(31, 41, 55, 0.72);
   }
 }
