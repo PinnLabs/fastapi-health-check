@@ -43,6 +43,8 @@ def app_factory():
         registry: HealthRegistry,
         *,
         path: str = "/ht",
+        liveness_path: str = "/health/live",
+        readiness_path: str = "/health/ready",
         ui_title: str = "System Health",
         include_in_schema: bool = False,
     ) -> FastAPI:
@@ -51,6 +53,8 @@ def app_factory():
             app,
             registry,
             path=path,
+            liveness_path=liveness_path,
+            readiness_path=readiness_path,
             ui_title=ui_title,
             include_in_schema=include_in_schema,
         )
