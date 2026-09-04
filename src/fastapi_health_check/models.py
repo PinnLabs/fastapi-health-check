@@ -21,6 +21,7 @@ class HealthReport(BaseModel):
 
     status: HealthStatus
     checks: list[HealthCheckResult]
+    duration_ms: float | None = Field(default=None, ge=0)
 
     @classmethod
     def from_checks(cls, checks: list[HealthCheckResult]) -> "HealthReport":

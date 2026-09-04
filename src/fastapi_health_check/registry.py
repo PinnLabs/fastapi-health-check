@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Iterable
+from time import perf_counter
 
 from fastapi_health_check.checks import HealthCheck
 from fastapi_health_check.models import HealthReport
@@ -40,8 +41,15 @@ class HealthRegistry:
         return check
 
     async def run_checks(self) -> HealthReport:
+        started_at = perf_counter()
+
         results = await asyncio.gather(*(check.run() for check in self._checks))
-        return HealthReport.from_checks(results)
+
+        report = HealthReport.from_checks(results)
+
+        duration_ms = round((perf_counter() - started_at) * 1000, 3)
+
+        return report.model_copy(update={"duration_ms": duration_ms})
 
     async def run_readiness_checks(self) -> HealthReport:
         results = [await check.run() for check in self._readiness_checks]
