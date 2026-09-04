@@ -37,6 +37,7 @@ def test_health_endpoint_returns_json_when_requested(app_factory, registry_facto
                 "duration_ms": response.json()["checks"][0]["duration_ms"],
             }
         ],
+        "duration_ms": response.json()["duration_ms"],
     }
     assert response.json()["checks"][0]["duration_ms"] >= 0
 
@@ -148,6 +149,8 @@ def test_health_endpoint_returns_503_instead_of_500_for_invalid_check_result(
                 "duration_ms": response.json()["checks"][0]["duration_ms"],
             }
         ],
+        "duration_ms": response.json()["duration_ms"],
+
     }
     assert response.json()["checks"][0]["duration_ms"] >= 0
 
@@ -185,6 +188,7 @@ def test_readiness_endpoint_returns_a_healthy_json_report(app_factory, registry_
                 "duration_ms": response.json()["checks"][0]["duration_ms"],
             }
         ],
+        "duration_ms": response.json()["duration_ms"],
     }
 
 
@@ -203,7 +207,7 @@ def test_readiness_failure_does_not_fail_liveness_by_default(
     assert readiness_response.json()["status"] == "fail"
     assert readiness_response.json()["checks"][0]["name"] == "failing"
     assert liveness_response.status_code == 200
-    assert liveness_response.json() == {"status": "ok", "checks": []}
+    assert liveness_response.json() == {"status": "ok", "checks": [],"duration_ms": None,}
 
 
 def test_liveness_endpoint_returns_an_unhealthy_json_report(app_factory, failing_check) -> None:

@@ -57,11 +57,16 @@ def test_run_checks_with_empty_registry_returns_healthy_report() -> None:
 
 def test_run_checks_tracks_execution_time(registry_factory, slow_passing_check) -> None:
     registry = registry_factory(slow_passing_check)
-
     report = asyncio.run(registry.run_checks())
 
     assert report.checks[0].duration_ms > 0
 
+def test_run_checks_tracks_total_execution_time(registry_factory, slow_passing_check) -> None:
+    registry = registry_factory(slow_passing_check)
+    report = asyncio.run(registry.run_checks())
+
+    assert report.duration_ms is not None
+    assert report.duration_ms > 0
 
 def test_registry_accepts_function_based_checks(registry_factory, callable_check) -> None:
     report = asyncio.run(registry_factory(callable_check).run_checks())
@@ -120,6 +125,8 @@ def test_run_checks_does_not_block_the_event_loop_for_sync_handlers() -> None:
 
     assert elapsed < 0.5
     assert report.checks[0].message == "sync result"
+
+
 def test_registered_checks_belong_to_readiness_by_default(passing_check) -> None:
     registry = HealthRegistry([passing_check])
 

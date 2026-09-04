@@ -39,6 +39,11 @@ def render_health_report_page(report: HealthReport, *, title: str = "FastAPI Hea
         "{{ summary_class }}": summary_class,
         "{{ summary_label }}": escape(summary_label),
         "{{ checks_count }}": str(len(report.checks)),
+        "{{ total_duration }}": (
+            _format_duration(report.duration_ms)
+            if report.duration_ms is not None
+            else "Unavailable"
+        ),
         "{{ checks_markup }}": checks_markup,
         "{{ powered_by_markup }}": _render_powered_by(),
     }
@@ -58,6 +63,13 @@ def _render_powered_by() -> str:
       {img}
     </footer>"""
 
+def _format_duration(duration_ms: float) -> str:
+    if duration_ms < 1:
+        return f"{duration_ms * 1000:.0f} µs"
+    if duration_ms < 1000:
+        return f"{duration_ms:.2f} ms"
+    return f"{duration_ms / 1000:.2f} s"
+
 
 def _render_check_card(check: HealthCheckResult) -> str:
     message = escape(check.message) if check.message else "No additional details."
@@ -66,7 +78,7 @@ def _render_check_card(check: HealthCheckResult) -> str:
             <h2 class="check-name">{escape(check.name)}</h2>
             <div class="check-meta">
               <div class="badge {check.status}">{escape(check.status.upper())}</div>
-              <span class="duration">{check.duration_ms:.3f} ms</span>
+              <span class="duration">{_format_duration(check.duration_ms)}</span>
             </div>
           </div>
           <p class="message">{message}</p>
