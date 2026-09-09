@@ -14,6 +14,10 @@ FastAPI health checks with separate liveness and readiness probes, a visual stat
   <img src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/example_use.png" alt="fastapi-ht example interface" width="100%" />
 </p>
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/example_failure.png" alt="fastapi-ht example interface with a failing dependency" width="100%" />
+</p>
+
 ## Why fastapi-ht
 
 - Separate `/health/live` and `/health/ready` JSON probes

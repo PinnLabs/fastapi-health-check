@@ -31,9 +31,19 @@
 
 ---
 
-### Example interface
+<p align="center">
+  <img alt="The /ht status page of the enterprise example: 14 dependency checks, all healthy" src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/example_use.png" width="900">
+</p>
 
-![fastapi-health-check example interface](https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/example_use.png)
+<p align="center">
+  <sub>The built-in <code>/ht</code> status page — every registered check with its status, message and duration.</sub>
+</p>
+
+When a dependency goes down, the failing check is highlighted, the overall status flips and `/ht` answers `503`:
+
+<p align="center">
+  <img alt="The same status page with the payments_api check failing and the overall status reporting issues" src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/example_failure.png" width="900">
+</p>
 
 ## Installation
 
@@ -255,3 +265,11 @@ Then open:
 - `curl -H "Accept: application/json" http://127.0.0.1:8000/ht` for JSON
 - `curl http://127.0.0.1:8000/health/live` for liveness
 - `curl http://127.0.0.1:8000/health/ready` for readiness
+
+A larger example lives at `src/examples/enterprise_app.py`. It registers 14 dependency
+checks and exposes a small console that can fail, slow down or recover each one, which
+is what the screenshots above show:
+
+```bash
+uv run uvicorn src.examples.enterprise_app:app --reload
+```
