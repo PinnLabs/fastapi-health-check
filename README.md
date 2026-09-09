@@ -1,11 +1,35 @@
 <p align="center">
-    <img src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo.png" alt="fastapi-health-check logo" width="520" style="display: block; margin:
-    0 auto;" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo-light.png">
+    <img alt="fastapi-health-check logo" src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo-light.png" width="220">
+  </picture>
 </p>
 
-# fastapi-health-check
+<h1 align="center">fastapi-health-check</h1>
 
-FastAPI health checks with separate liveness and readiness probes, a visual status page, and JSON responses.
+<p align="center">
+  FastAPI health checks with separate liveness and readiness probes, a visual status page, and JSON responses.
+</p>
+
+<p align="center">
+  <a href="https://pypi.org/project/fastapi-ht/"><img alt="PyPI" src="https://img.shields.io/pypi/v/fastapi-ht?color=0b7285&label=pypi"></a>
+  <a href="https://pypi.org/project/fastapi-ht/"><img alt="Python versions" src="https://img.shields.io/pypi/pyversions/fastapi-ht"></a>
+  <a href="https://github.com/PinnLabs/fastapi-health-check/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/PinnLabs/fastapi-health-check/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://pinnlabs.github.io/fastapi-health-check/"><img alt="Docs" src="https://img.shields.io/badge/docs-mkdocs--material-0b7285"></a>
+</p>
+
+<p align="center">
+  <a href="https://pinnlabs.github.io/fastapi-health-check/">Documentation</a>
+  &nbsp;&middot;&nbsp;
+  <a href="#installation">Installation</a>
+  &nbsp;&middot;&nbsp;
+  <a href="#what-the-library-provides">Features</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://github.com/PinnLabs/fastapi-health-check/issues">Issues</a>
+</p>
+
+---
 
 ### Example interface
 

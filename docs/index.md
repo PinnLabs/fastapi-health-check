@@ -3,7 +3,11 @@
 FastAPI health checks with separate liveness and readiness probes, a visual status page, and a small API for custom monitoring.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo.png" alt="fastapi-ht logo" width="220" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo-light.png">
+    <img src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/logo-light.png" alt="fastapi-ht logo" width="220" />
+  </picture>
 </p>
 
 <p align="center">
