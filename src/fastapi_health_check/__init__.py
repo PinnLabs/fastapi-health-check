@@ -6,6 +6,7 @@ from fastapi_health_check.postgresql import PostgreSQLCheck
 from fastapi_health_check.registry import HealthRegistry
 from fastapi_health_check.sqlalchemy import SQLAlchemyCheck
 from fastapi_health_check.ui import render_health_report_page
+from fastapi_health_check.disk import DiskSpaceCheck
 
 __all__ = [
     "AppAliveCheck",
@@ -20,4 +21,5 @@ __all__ = [
     "health_check",
     "install_health_check",
     "render_health_report_page",
+    "DiskSpaceCheck",
 ]
