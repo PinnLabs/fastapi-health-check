@@ -100,6 +100,56 @@ A successful check reports `PostgreSQL available`. A connection or query failure
 
 As with every current health check, a PostgreSQL failure is critical and makes its health report fail.
 
+## Built-in disk space check
+
+`DiskSpaceCheck` monitors available disk space for a configured path. It can enforce either a minimum number of free bytes, a minimum percentage of free space, or both.
+
+The check uses Python's standard library and does not require any additional dependencies.
+
+A minimum free byte threshold can be configured like this:
+
+```python
+from fastapi_health_check import DiskSpaceCheck, HealthRegistry
+
+registry = HealthRegistry(
+    [
+        DiskSpaceCheck(
+            path=".",
+            min_free_bytes=1_000_000_000,
+        )
+    ]
+)
+```
+
+A percentage-based threshold can also be used:
+
+```python
+registry.register(
+    DiskSpaceCheck(
+        path=".",
+        min_free_percent=10.0,
+    )
+)
+```
+
+Both thresholds may be provided when an application needs to enforce multiple disk space requirements.
+
+A successful check reports the number of free bytes and the percentage of available disk space. If the configured threshold is not met, the check fails and reports that the available disk space is below the required threshold.
+
+Invalid or inaccessible paths are handled gracefully and return a failed health check rather than crashing the application.
+
+A custom name is also supported:
+
+```python
+registry.register(
+    DiskSpaceCheck(
+        path="/var",
+        min_free_percent=15.0,
+        name="application_storage",
+    )
+)
+```
+
 ## Function-based checks
 
 The easiest way to monitor custom areas is `health_check()`.
