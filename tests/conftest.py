@@ -5,7 +5,12 @@ import asyncio
 import pytest
 from fastapi import FastAPI
 
-from fastapi_health_check import HealthCheck, HealthRegistry, health_check, install_health_check
+from fastapi_health_check import (
+    HealthCheck,
+    HealthRegistry,
+    health_check,
+    install_health_check,
+)
 
 
 class PassingCheck(HealthCheck):
