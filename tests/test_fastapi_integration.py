@@ -7,7 +7,9 @@ from fastapi.testclient import TestClient
 from fastapi_health_check import HealthRegistry, health_check
 
 
-def test_health_endpoint_returns_html_by_default(app_factory, registry_factory, passing_check) -> None:
+def test_health_endpoint_returns_html_by_default(
+    app_factory, registry_factory, passing_check
+) -> None:
     app = app_factory(registry_factory(passing_check))
     client = TestClient(app)
 
@@ -16,10 +18,12 @@ def test_health_endpoint_returns_html_by_default(app_factory, registry_factory, 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
     assert "FastAPI Health Check" in response.text
-    assert "Healthy" in response.text
+    assert "healthy" in response.text
 
 
-def test_health_endpoint_returns_json_when_requested(app_factory, registry_factory, passing_check) -> None:
+def test_health_endpoint_returns_json_when_requested(
+    app_factory, registry_factory, passing_check
+) -> None:
     app = app_factory(registry_factory(passing_check))
     client = TestClient(app)
 
@@ -58,13 +62,16 @@ def test_health_endpoint_returns_503_for_unhealthy_registry(
     assert response.json()["checks"][1]["message"] == "dependency unavailable"
 
 
-def test_health_endpoint_accepts_custom_path(app_factory, registry_factory, passing_check) -> None:
+def test_health_endpoint_accepts_custom_path(
+    app_factory, registry_factory, passing_check
+) -> None:
     app = app_factory(registry_factory(passing_check), path="/status")
     client = TestClient(app)
 
     response = client.get("/status")
 
     assert response.status_code == 200
+    assert 'href="/status"' in response.text
     assert client.get("/ht").status_code == 404
 
 
@@ -81,7 +88,9 @@ def test_health_endpoint_is_hidden_from_openapi_by_default(
     assert "/ht" not in response.json()["paths"]
 
 
-def test_health_endpoint_can_be_included_in_openapi(app_factory, registry_factory, passing_check) -> None:
+def test_health_endpoint_can_be_included_in_openapi(
+    app_factory, registry_factory, passing_check
+) -> None:
     app = app_factory(registry_factory(passing_check), include_in_schema=True)
     client = TestClient(app)
 
@@ -90,7 +99,9 @@ def test_health_endpoint_can_be_included_in_openapi(app_factory, registry_factor
     assert "/ht" in response.json()["paths"]
 
 
-def test_health_endpoint_renders_html_for_healthy_registry(app_factory, registry_factory, message_check) -> None:
+def test_health_endpoint_renders_html_for_healthy_registry(
+    app_factory, registry_factory, message_check
+) -> None:
     app = app_factory(registry_factory(message_check))
     client = TestClient(app)
 
@@ -99,7 +110,7 @@ def test_health_endpoint_renders_html_for_healthy_registry(app_factory, registry
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/html")
     assert "FastAPI Health Check" in response.text
-    assert "Healthy" in response.text
+    assert "healthy" in response.text
     assert "dependency available" in response.text
 
 
@@ -115,11 +126,13 @@ def test_health_endpoint_renders_html_for_unhealthy_registry(
     response = client.get("/ht")
 
     assert response.status_code == 503
-    assert "Issues detected" in response.text
+    assert "unhealthy" in response.text
     assert "dependency unavailable" in response.text
 
 
-def test_health_endpoint_accepts_custom_title(app_factory, registry_factory, passing_check) -> None:
+def test_health_endpoint_accepts_custom_title(
+    app_factory, registry_factory, passing_check
+) -> None:
     app = app_factory(registry_factory(passing_check), ui_title="API Operations")
     client = TestClient(app)
 
@@ -132,7 +145,9 @@ def test_health_endpoint_returns_503_instead_of_500_for_invalid_check_result(
     app_factory,
     registry_factory,
 ) -> None:
-    bad_handler: Any = lambda: {"ok": True}
+    def bad_handler() -> Any:
+        return {"ok": True}
+
     app = app_factory(registry_factory(health_check("invalid", bad_handler)))
     client = TestClient(app, raise_server_exceptions=False)
 
@@ -150,7 +165,6 @@ def test_health_endpoint_returns_503_instead_of_500_for_invalid_check_result(
             }
         ],
         "duration_ms": response.json()["duration_ms"],
-
     }
     assert response.json()["checks"][0]["duration_ms"] >= 0
 
@@ -159,18 +173,22 @@ def test_health_endpoint_renders_html_for_invalid_check_result(
     app_factory,
     registry_factory,
 ) -> None:
-    bad_handler: Any = lambda: {"ok": True}
+    def bad_handler() -> Any:
+        return {"ok": True}
+
     app = app_factory(registry_factory(health_check("invalid", bad_handler)))
     client = TestClient(app, raise_server_exceptions=False)
 
     response = client.get("/ht")
 
     assert response.status_code == 503
-    assert "Issues detected" in response.text
+    assert "unhealthy" in response.text
     assert "health checks must return a string or None" in response.text
 
 
-def test_readiness_endpoint_returns_a_healthy_json_report(app_factory, registry_factory, passing_check) -> None:
+def test_readiness_endpoint_returns_a_healthy_json_report(
+    app_factory, registry_factory, passing_check
+) -> None:
     app = app_factory(registry_factory(passing_check))
     client = TestClient(app)
 
@@ -207,10 +225,16 @@ def test_readiness_failure_does_not_fail_liveness_by_default(
     assert readiness_response.json()["status"] == "fail"
     assert readiness_response.json()["checks"][0]["name"] == "failing"
     assert liveness_response.status_code == 200
-    assert liveness_response.json() == {"status": "ok", "checks": [],"duration_ms": None,}
+    assert liveness_response.json() == {
+        "status": "ok",
+        "checks": [],
+        "duration_ms": None,
+    }
 
 
-def test_liveness_endpoint_returns_an_unhealthy_json_report(app_factory, failing_check) -> None:
+def test_liveness_endpoint_returns_an_unhealthy_json_report(
+    app_factory, failing_check
+) -> None:
     registry = HealthRegistry()
     registry.register(failing_check, readiness=False, liveness=True)
     app = app_factory(registry)
@@ -223,7 +247,9 @@ def test_liveness_endpoint_returns_an_unhealthy_json_report(app_factory, failing
     assert response.json()["checks"][0]["name"] == "failing"
 
 
-def test_probe_endpoints_accept_independent_custom_paths(app_factory, registry_factory, passing_check) -> None:
+def test_probe_endpoints_accept_independent_custom_paths(
+    app_factory, registry_factory, passing_check
+) -> None:
     app = app_factory(
         registry_factory(passing_check),
         liveness_path="/livez",
@@ -235,3 +261,7 @@ def test_probe_endpoints_accept_independent_custom_paths(app_factory, registry_f
     assert client.get("/readyz").status_code == 200
     assert client.get("/health/live").status_code == 404
     assert client.get("/health/ready").status_code == 404
+
+    status_page = client.get("/ht")
+    assert 'href="/livez"' in status_page.text
+    assert 'href="/readyz"' in status_page.text

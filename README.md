@@ -156,6 +156,9 @@ registry.register(health_check("redis", lambda: "cache reachable"))
 install_health_check(app, registry)
 ```
 
+The built-in status page is rendered as a self-contained system diagnostic; no
+frontend framework or external asset host is required.
+
 This exposes three routes:
 
 - `GET /health/live` returns the liveness report as JSON
