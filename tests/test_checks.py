@@ -52,7 +52,9 @@ def test_health_check_factory_supports_async_handlers() -> None:
 
 
 def test_health_check_run_returns_failure_result_on_invalid_message_type() -> None:
-    bad_handler: Any = lambda: {"ok": True}
+    def bad_handler() -> Any:
+        return {"ok": True}
+
     result = asyncio.run(health_check("invalid", bad_handler).run())
 
     assert result.name == "invalid"
