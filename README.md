@@ -32,17 +32,11 @@
 ---
 
 <p align="center">
-  <img alt="The /ht status page of the enterprise example: 14 dependency checks, all healthy" src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/example_use.png" width="900">
+  <img alt="The /ht diagnostic report for the enterprise example with 14 healthy dependency checks" src="public/demo-image.png" width="746">
 </p>
 
 <p align="center">
-  <sub>The built-in <code>/ht</code> status page — every registered check with its status, message and duration.</sub>
-</p>
-
-When a dependency goes down, the failing check is highlighted, the overall status flips and `/ht` answers `503`:
-
-<p align="center">
-  <img alt="The same status page with the payments_api check failing and the overall status reporting issues" src="https://raw.githubusercontent.com/PinnLabs/fastapi-health-check/main/public/example_failure.png" width="900">
+  <sub>The built-in <code>/ht</code> diagnostic report — every registered check with its status, message and latency.</sub>
 </p>
 
 ## Installation
