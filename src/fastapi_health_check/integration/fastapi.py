@@ -20,7 +20,9 @@ def install_health_check(
 ) -> None:
     def json_response(report: HealthReport) -> JSONResponse:
         status_code = 200 if report.is_healthy else 503
-        return JSONResponse(status_code=status_code, content=report.model_dump(mode="json"))
+        return JSONResponse(
+            status_code=status_code, content=report.model_dump(mode="json")
+        )
 
     async def health_endpoint(request: Request) -> Response:
         report = await registry.run_checks()
@@ -29,9 +31,17 @@ def install_health_check(
         prefers_json = "application/json" in accept and "text/html" not in accept
 
         if prefers_json:
-            return JSONResponse(status_code=status_code, content=report.model_dump(mode="json"))
+            return JSONResponse(
+                status_code=status_code, content=report.model_dump(mode="json")
+            )
 
-        content = render_health_report_page(report, title=ui_title)
+        content = render_health_report_page(
+            report,
+            title=ui_title,
+            endpoint=path,
+            liveness_endpoint=liveness_path,
+            readiness_endpoint=readiness_path,
+        )
         return HTMLResponse(status_code=status_code, content=content)
 
     async def liveness_endpoint() -> JSONResponse:
