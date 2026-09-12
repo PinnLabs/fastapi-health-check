@@ -3,36 +3,74 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ title }}</title>
+    <meta name="description" content="FastAPI application system diagnostic report" />
+    <title>{{ title }} · fastapi-health-check</title>
     <style>
 {{ styles }}
     </style>
   </head>
   <body>
-    <main class="page">
-      <section class="hero">
-        <p class="eyebrow">FastAPI Health Check</p>
-        <h1>{{ title }}</h1>
-        <p class="subtitle">A compact operational view of backend dependencies, designed for quick status inspection.</p>
-      </section>
-      <section class="summary">
-        <article class="summary-card">
-          <p class="summary-label">Overall status</p>
-          <div class="badge {{ summary_class }}">{{ summary_label }}</div>
-        </article>
-        <article class="summary-card">
-          <p class="summary-label">Checks</p>
-          <p class="summary-value">{{ checks_count }}</p>
-        </article>
-        <article class="summary-card">
-          <p class="summary-label">Total duration</p>
-          <p class="summary-value">{{ total_duration }}</p>
-        </article>
-      </section>
-      <section class="checks">
+    <a class="skip-link" href="#diagnostic-checks">Skip to diagnostic checks</a>
+
+    <header class="site-header">
+      <div class="shell site-header__inner">
+        <a class="brand" href="{{ endpoint_href }}" aria-label="FastAPI Health Check home">
+          <span class="brand__product">fastapi-health-check</span>
+          <span class="brand__maker">PinnLabs</span>
+        </a>
+
+        <nav class="primary-nav" aria-label="Diagnostic endpoints">
+          <a class="primary-nav__link primary-nav__link--active" href="{{ endpoint_href }}">/ht</a>
+          <a class="primary-nav__link" href="{{ liveness_href }}">/live</a>
+          <a class="primary-nav__link" href="{{ readiness_href }}">/ready</a>
+          <a class="primary-nav__link" href="https://github.com/PinnLabs/fastapi-health-check" target="_blank" rel="noreferrer">GitHub&nbsp;↗</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="shell report">
+      <section class="checks" id="diagnostic-checks" aria-labelledby="checks-title">
+        <div class="diagnostic-timestamp">
+          <span>Diagnostic timestamp</span>
+          <time id="diagnostic-timestamp" datetime="{{ diagnostic_datetime }}">{{ diagnostic_timestamp }}</time>
+        </div>
+
+        <div class="checks__heading">
+          <h1 id="checks-title">Diagnostic Checks</h1>
+          <div class="checks__actions">
+            <p class="checks__hint"><span aria-hidden="true">↳</span> Select a row for trace details</p>
+            <button class="run-button" id="run-diagnostic" type="button" data-endpoint="{{ endpoint_href }}">
+              Run diagnostic <span aria-hidden="true">↻</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="diagnostic-table" id="diagnostic-table" role="table" aria-label="Health check results" aria-live="polite">
+          <div class="table-header" role="row">
+            <span role="columnheader">Name</span>
+            <span role="columnheader">Status</span>
+            <span role="columnheader">Latency</span>
+            <span role="columnheader">Message</span>
+          </div>
 {{ checks_markup }}
+        </div>
       </section>
     </main>
-{{ powered_by_markup }}
+
+    <footer class="site-footer">
+      <div class="shell site-footer__inner">
+        <div>
+          <strong>fastapi-health-check</strong>
+          <span>Health checks for real applications.</span>
+        </div>
+        <div class="site-footer__maker">
+          <a class="site-footer__credit" href="https://www.pinnlabs.tech" target="_blank" rel="noreferrer">Built by PinnLabs <span aria-hidden="true">↗</span></a>
+          <span>Open source <b aria-hidden="true">•</b> Built for builders</span>
+        </div>
+      </div>
+    </footer>
+    <script>
+{{ script }}
+    </script>
   </body>
 </html>
