@@ -1,13 +1,45 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+import re
+from datetime import UTC, datetime, timedelta, timezone
 from functools import lru_cache
 from html import escape
 from importlib.resources import files
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from fastapi_health_check.models import HealthCheckResult, HealthReport
 
 _ASSETS = files("fastapi_health_check.assets")
+_UTC_OFFSET = re.compile(r"UTC([+-])(\d{2}):(\d{2})\Z")
+
+
+def _resolve_time_zone(name: str) -> ZoneInfo | timezone:
+    if name == "UTC":
+        return UTC
+
+    match = _UTC_OFFSET.fullmatch(name)
+    if match:
+        sign, hours, minutes = match.groups()
+        if int(hours) > 23 or int(minutes) > 59:
+            raise ValueError(f"Invalid time zone offset: {name}")
+        offset = timedelta(hours=int(hours), minutes=int(minutes))
+        return timezone(offset if sign == "+" else -offset)
+
+    try:
+        return ZoneInfo(name)
+    except ZoneInfoNotFoundError as exc:
+        raise ValueError(f"Unknown time zone: {name}") from exc
+
+
+def _time_zone_label(timestamp: datetime) -> str:
+    offset = timestamp.utcoffset()
+    if offset == timedelta(0):
+        return "UTC"
+    assert offset is not None
+    sign = "+" if offset > timedelta(0) else "-"
+    total_minutes = abs(int(offset.total_seconds() // 60))
+    hours, minutes = divmod(total_minutes, 60)
+    return f"UTC{sign}{hours:02d}:{minutes:02d}"
 
 
 @lru_cache(maxsize=1)
@@ -33,11 +65,13 @@ def render_health_report_page(
     liveness_endpoint: str = "/health/live",
     readiness_endpoint: str = "/health/ready",
     generated_at: datetime | None = None,
+    time_zone: str = "UTC",
 ) -> str:
     """Render a self-contained diagnostic report for a health-check run."""
     timestamp = generated_at or datetime.now(UTC)
-    timestamp = timestamp.astimezone(UTC)
-    checked_at = timestamp.strftime("%H:%M:%S.%f")[:-3]
+    timestamp = timestamp.astimezone(_resolve_time_zone(time_zone))
+    zone_label = _time_zone_label(timestamp)
+    checked_at = timestamp.strftime("%H:%M:%S.%f")[:-3] + f" {zone_label}"
     checks_markup = (
         "\n".join(
             _render_check_row(check, index=index, checked_at=checked_at)
@@ -54,8 +88,9 @@ def render_health_report_page(
         "{{ liveness_href }}": escape(liveness_endpoint, quote=True),
         "{{ readiness_href }}": escape(readiness_endpoint, quote=True),
         "{{ diagnostic_datetime }}": timestamp.isoformat(timespec="milliseconds"),
+        "{{ time_zone }}": escape(time_zone, quote=True),
         "{{ diagnostic_timestamp }}": timestamp.strftime("%Y-%m-%d / %H:%M:%S.%f")[:-3]
-        + " UTC",
+        + f" {zone_label}",
         "{{ checks_markup }}": checks_markup,
     }
 
@@ -101,7 +136,7 @@ def _render_check_row(check: HealthCheckResult, *, index: int, checked_at: str) 
                 <div class="trace__line"><span class="trace__branch">├─</span><span class="trace__key">type</span><span class="trace__value">registry_check</span></div>
                 <div class="trace__line"><span class="trace__branch">├─</span><span class="trace__key">identifier</span><span class="trace__value">{escape(check.name)}</span></div>
                 <div class="trace__line"><span class="trace__branch">├─</span><span class="trace__key">duration</span><span class="trace__value" data-detail-duration>{_format_duration(check.duration_ms)}</span></div>
-                <div class="trace__line"><span class="trace__branch">├─</span><span class="trace__key">checked_at</span><span class="trace__value" data-detail-checked-at>{checked_at} UTC</span></div>
+                <div class="trace__line"><span class="trace__branch">├─</span><span class="trace__key">checked_at</span><span class="trace__value" data-detail-checked-at>{checked_at}</span></div>
                 <div class="trace__line"><span class="trace__branch">{is_last_branch}</span><span class="trace__key" data-detail-message-key>{detail_label}</span><span class="trace__value{detail_value_class}" data-detail-message>{message}</span></div>
               </div>
             </div>

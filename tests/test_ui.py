@@ -1,5 +1,7 @@
 from datetime import UTC, datetime
 
+import pytest
+
 from fastapi_health_check.models import HealthCheckResult, HealthReport
 from fastapi_health_check.ui import render_health_report_page
 
@@ -80,6 +82,55 @@ def test_render_health_report_builds_minimal_diagnostic_header() -> None:
     assert "No health checks are currently registered" in html
     assert "Built by PinnLabs" in html
     assert 'href="https://www.pinnlabs.tech"' in html
+
+
+@pytest.mark.parametrize(
+    ("time_zone", "expected"),
+    [
+        ("UTC-03:00", "2026-09-18 / 19:52:52.466 UTC-03:00"),
+        ("America/Fortaleza", "2026-09-18 / 19:52:52.466 UTC-03:00"),
+        ("America/New_York", "2026-09-18 / 18:52:52.466 UTC-04:00"),
+        ("UTC+05:30", "2026-09-19 / 04:22:52.466 UTC+05:30"),
+    ],
+)
+def test_render_health_report_uses_configured_time_zone(
+    time_zone: str, expected: str
+) -> None:
+    report = HealthReport(
+        status="ok",
+        checks=[HealthCheckResult(name="redis", status="ok", duration_ms=1)],
+        duration_ms=1,
+    )
+
+    html = render_health_report_page(
+        report,
+        generated_at=datetime(2026, 9, 18, 22, 52, 52, 466000, tzinfo=UTC),
+        time_zone=time_zone,
+    )
+
+    assert expected in html
+    assert 'data-time-zone="' + time_zone + '"' in html
+    assert f"data-detail-checked-at>{expected.split(' / ')[1]}</span>" in html
+
+
+def test_render_health_report_uses_winter_offset_for_iana_zone() -> None:
+    report = HealthReport(status="ok", checks=[], duration_ms=0)
+
+    html = render_health_report_page(
+        report,
+        generated_at=datetime(2026, 1, 18, 22, 52, 52, 466000, tzinfo=UTC),
+        time_zone="America/New_York",
+    )
+
+    assert "2026-01-18 / 17:52:52.466 UTC-05:00" in html
+
+
+@pytest.mark.parametrize("time_zone", ["UTC-24:00", "UTC+02:60", "Not/A_Zone"])
+def test_render_health_report_rejects_invalid_time_zone(time_zone: str) -> None:
+    report = HealthReport(status="ok", checks=[], duration_ms=0)
+
+    with pytest.raises(ValueError):
+        render_health_report_page(report, time_zone=time_zone)
 
 
 def test_render_health_report_uses_expandable_rows_and_escapes_values() -> None:

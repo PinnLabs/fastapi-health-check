@@ -16,6 +16,7 @@ def install_health_check(
     liveness_path: str = "/health/live",
     readiness_path: str = "/health/ready",
     ui_title: str = "System Health",
+    time_zone: str = "UTC",
     include_in_schema: bool = False,
 ) -> None:
     def json_response(report: HealthReport) -> JSONResponse:
@@ -41,6 +42,7 @@ def install_health_check(
             endpoint=path,
             liveness_endpoint=liveness_path,
             readiness_endpoint=readiness_path,
+            time_zone=time_zone,
         )
         return HTMLResponse(status_code=status_code, content=content)
 

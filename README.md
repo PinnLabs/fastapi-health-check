@@ -153,6 +153,19 @@ install_health_check(app, registry)
 The built-in status page is rendered as a self-contained system diagnostic; no
 frontend framework or external asset host is required.
 
+The page displays timestamps in UTC by default. Set `time_zone` to an IANA time
+zone name or a fixed UTC offset to display the diagnostic timestamp and each
+check's `checked_at` value in that zone:
+
+```python
+install_health_check(app, registry, time_zone="America/Fortaleza")
+# Or use a fixed offset: time_zone="UTC-03:00"
+```
+
+The configured zone is also used when the page reruns a diagnostic. Fixed
+offsets do not account for daylight saving time; use an IANA name when that
+matters. This setting affects the HTML page only.
+
 This exposes three routes:
 
 - `GET /health/live` returns the liveness report as JSON
