@@ -13,7 +13,41 @@
     return `${(durationMs / 1000).toFixed(2)} s`;
   };
 
-  const utcTime = () => `${new Date().toISOString().slice(11, 23)} UTC`;
+  const timestamp = document.querySelector("#diagnostic-timestamp");
+  const timeZone = timestamp.dataset.timeZone;
+
+  const formatTimestamp = (now) => {
+    const fixedOffset = /^UTC([+-])(\d{2}):(\d{2})$/.exec(timeZone);
+    if (timeZone === "UTC" || fixedOffset) {
+      const minutes = fixedOffset
+        ? (Number(fixedOffset[2]) * 60 + Number(fixedOffset[3])) * (fixedOffset[1] === "+" ? 1 : -1)
+        : 0;
+      const shifted = new Date(now.getTime() + minutes * 60_000).toISOString();
+      return {
+        date: shifted.slice(0, 10),
+        time: shifted.slice(11, 23),
+        label: minutes === 0 ? "UTC" : timeZone,
+      };
+    }
+
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+      timeZoneName: "longOffset",
+    });
+    const parts = Object.fromEntries(formatter.formatToParts(now).map(({ type, value }) => [type, value]));
+    return {
+      date: `${parts.year}-${parts.month}-${parts.day}`,
+      time: `${parts.hour}:${parts.minute}:${parts.second}.${String(now.getUTCMilliseconds()).padStart(3, "0")}`,
+      label: parts.timeZoneName.replace("GMT", "UTC"),
+    };
+  };
 
   const updateRecord = (record, check, checkedAt) => {
     const isHealthy = check.status === "ok";
@@ -48,11 +82,9 @@
     });
   };
 
-  const updateTimestamp = () => {
-    const timestamp = document.querySelector("#diagnostic-timestamp");
-    const now = new Date();
+  const updateTimestamp = (now, formatted) => {
     timestamp.dateTime = now.toISOString();
-    timestamp.textContent = `${now.toISOString().slice(0, 10)} / ${utcTime()}`;
+    timestamp.textContent = `${formatted.date} / ${formatted.time} ${formatted.label}`;
   };
 
   const runDiagnostic = async () => {
@@ -66,11 +98,13 @@
         headers: { Accept: "application/json" },
       });
       const report = await response.json();
-      const checkedAt = utcTime();
+      const now = new Date();
+      const formatted = formatTimestamp(now);
+      const checkedAt = `${formatted.time} ${formatted.label}`;
       records().forEach((record, index) => {
         if (report.checks[index]) updateRecord(record, report.checks[index], checkedAt);
       });
-      updateTimestamp();
+      updateTimestamp(now, formatted);
     } catch (_error) {
       records().forEach((record) => {
         const status = record.querySelector("[data-status]");
