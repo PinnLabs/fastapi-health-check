@@ -21,6 +21,17 @@ def test_health_endpoint_returns_html_by_default(
     assert "healthy" in response.text
 
 
+def test_health_endpoint_uses_configured_time_zone(
+    app_factory, registry_factory, passing_check
+) -> None:
+    app = app_factory(registry_factory(passing_check), time_zone="UTC-03:00")
+    response = TestClient(app).get("/ht")
+
+    assert response.status_code == 200
+    assert 'data-time-zone="UTC-03:00"' in response.text
+    assert " UTC-03:00" in response.text
+
+
 def test_health_endpoint_returns_json_when_requested(
     app_factory, registry_factory, passing_check
 ) -> None:

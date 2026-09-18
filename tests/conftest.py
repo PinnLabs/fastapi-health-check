@@ -51,6 +51,7 @@ def app_factory():
         liveness_path: str = "/health/live",
         readiness_path: str = "/health/ready",
         ui_title: str = "System Health",
+        time_zone: str = "UTC",
         include_in_schema: bool = False,
     ) -> FastAPI:
         app = FastAPI()
@@ -61,6 +62,7 @@ def app_factory():
             liveness_path=liveness_path,
             readiness_path=readiness_path,
             ui_title=ui_title,
+            time_zone=time_zone,
             include_in_schema=include_in_schema,
         )
         return app
